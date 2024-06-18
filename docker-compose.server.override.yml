@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  phpfpm:
+    image: itkdev/php8.2-fpm:alpine
+    volumes:
+      - ./freescout:/app
+
+  nginx:
+    volumes:
+      - ./freescout:/app
