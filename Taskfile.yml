@@ -9,21 +9,42 @@ vars:
   DOCKERCMD_SERVER: 'itkdev-docker-compose-server'
 
 tasks:
-  dist:clone:
-    summary: Clone freescout distribution.
+  dist:build:
+    summary: Install Freescout distribution and fix bug in natxet extension
     cmds:
-      - git clone https://github.com/freescout-help-desk/freescout {{ .TARGET_DIR }}
+      - sh -c "mkdir freescout"
+      - sh -c "wget https://github.com/freescout-help-desk/freescout/archive/refs/tags/{{.VERSION}}.tar.gz"
+      - sh -c "tar -xzvf ./{{.VERSION}}.tar.gz"
+      - sh -c "mv freescout-{{.VERSION}}/* freescout"
+      - sh -c "rm -Rf freescout-{{.VERSION}} {{.VERSION}}.tar.gz"
 
   dev:start-docker:
     cmds:
       - sh -c "{{ .DOCKERCMD }} up --detach --force-recreate --remove-orphans"
 
+  dev:install:
+    - sh -c "cp templates/.env.example freescout/.env"
+    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan key:generate"
+
+  dev:install-modules:
+    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
+    - git clone https://github.com/itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
+    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan freescout:clear-cache"
+    - sh -c "{{ .DOCKERCMD }} composer dumpautoload"
+
+  server:install:
+    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
+    - sh -c "cp templates/.env.example freescout/.env"
+    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan key:generate"
+
   server:start-docker:
     cmds:
       - sh -c "{{ .DOCKERCMD_SERVER }} up --detach --force-recreate --remove-orphans"
 
-  dev:install:sample-module:
-    summary: Clones sample module into modules folder.
-    cmds:
-      - git clone https://github.com/freescout-help-desk/SampleModule {{ .PLUGIN_TARGET_DIR }}/SampleModule
-      - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan freescout:clear-cache"
+  server:install-modules:
+    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
+    - git clone https://github.com/itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
+    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan freescout:clear-cache"
+    - sh -c "{{ .DOCKERCMD_SERVER }} composer dumpautoload
+
+
