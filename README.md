@@ -42,6 +42,11 @@ task server:install
 ### Add custom modules
 
 Local development:
-```dev:install-modules```
+```
+task dev:install-modules
+```
 
-Server: ```server:install-modules```
+Server: 
+```
+task server:install-modules
+```
