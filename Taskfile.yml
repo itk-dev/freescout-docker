@@ -45,6 +45,6 @@ tasks:
     - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
     - git clone https://github.com/itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
     - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan freescout:clear-cache"
-    - sh -c "{{ .DOCKERCMD_SERVER }} composer dumpautoload"
+    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm composer dumpautoload"
 
 
