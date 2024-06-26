@@ -39,6 +39,12 @@ task server:start-docker
 task server:install
 ```
 
+Add user
+```
+idc exec phpfpm php artisan freescout:create-user
+```
+
+
 ### Add custom modules
 
 Local development:
