@@ -10,7 +10,7 @@ vars:
 
 tasks:
   dist:build:
-    summary: Install Freescout distribution and fix bug in natxet extension
+    summary: Install Freescout distribution
     cmds:
       - sh -c "wget https://github.com/freescout-help-desk/freescout/archive/refs/tags/{{.VERSION}}.tar.gz"
       - sh -c "mkdir freescout"
@@ -28,22 +28,24 @@ tasks:
 
   dev:install-modules:
     - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
-    - git clone https://github.com/itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
+    - git clone git@github.com:itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
+    - git clone git@github.com:itk-dev/freescout-itk-portal-submit.git {{ .PLUGIN_TARGET_DIR }}/ItkPortalSubmit
     - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan freescout:clear-cache"
     - sh -c "{{ .DOCKERCMD }} composer dumpautoload"
+
+  server:start-docker:
+    cmds:
+      - sh -c "{{ .DOCKERCMD_SERVER }} up --detach --force-recreate --remove-orphans"
 
   server:install:
     - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
     - sh -c "cp templates/.env.example freescout/.env"
     - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan key:generate"
 
-  server:start-docker:
-    cmds:
-      - sh -c "{{ .DOCKERCMD_SERVER }} up --detach --force-recreate --remove-orphans"
-
   server:install-modules:
     - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
     - git clone https://github.com/itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
+    - git clone https://github.com/itk-dev/freescout-itk-portal-submit.git {{ .PLUGIN_TARGET_DIR }}/ItkPortalSubmit
     - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan freescout:clear-cache"
     - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm composer dumpautoload"
 
