@@ -9,21 +9,47 @@ vars:
   DOCKERCMD_SERVER: 'itkdev-docker-compose-server'
 
 tasks:
-  dist:clone:
-    summary: Clone freescout distribution.
+  dist:build:
+    summary: Install Freescout distribution
     cmds:
-      - git clone https://github.com/freescout-help-desk/freescout {{ .TARGET_DIR }}
+      - sh -c "wget https://github.com/freescout-help-desk/freescout/archive/refs/tags/{{.VERSION}}.tar.gz"
+      - sh -c "mkdir freescout"
+      - sh -c "tar -xzf ./{{.VERSION}}.tar.gz --strip-components 1 -C freescout"
+      - sh -c "rm {{.VERSION}}.tar.gz"
+
+  fetch-modules:
+    - git clone https://github.com/itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
+    - git clone https://github.com/itk-dev/freescout-itk-portal-submit.git {{ .PLUGIN_TARGET_DIR }}/ItkPortalSubmit
 
   dev:start-docker:
     cmds:
       - sh -c "{{ .DOCKERCMD }} up --detach --force-recreate --remove-orphans"
 
+  dev:install:
+    - sh -c "cp templates/.env.example freescout/.env"
+    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan key:generate"
+    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan migrate:fresh"
+
+  dev:install-modules:
+    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
+    - task fetch-modules
+    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan freescout:clear-cache"
+    - sh -c "{{ .DOCKERCMD }} composer dumpautoload"
+
   server:start-docker:
     cmds:
       - sh -c "{{ .DOCKERCMD_SERVER }} up --detach --force-recreate --remove-orphans"
 
-  dev:install:sample-module:
-    summary: Clones sample module into modules folder.
-    cmds:
-      - git clone https://github.com/freescout-help-desk/SampleModule {{ .PLUGIN_TARGET_DIR }}/SampleModule
-      - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan freescout:clear-cache"
+  server:install:
+    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
+    - sh -c "cp templates/.env.example freescout/.env"
+    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan key:generate"
+    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan migrate:fresh"
+
+  server:install-modules:
+    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
+    - task fetch-modules
+    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan freescout:clear-cache"
+    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm composer dumpautoload"
+
+

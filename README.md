@@ -9,21 +9,44 @@
 
 * [FreeScout modules](https://github.com/freescout-helpdesk/freescout/wiki/FreeScout-Modules)
 * [FreeScout modules development guide](https://github.com/freescout-help-desk/freescout/wiki/Development-Guide)
+
 ## Install
     
-### Clone freescout distribution version into freescout folder.
+### Install a specific Freescout distribution version into freescout folder.
 
+I.e.
 ```shell
-task dist:clone
+task dist:build VERSION=1.8.145
 ```
 
-### Start docker
+### Dev installation
 
 ```shell
 task dev:start-docker
 ```
 
-### Finish installation
+```shell
+task dev:install
+```
 
-To complete the installation open http://freescout.local.itkdev.dk/install and follow the web-installer.
-If a .env file exists in the freescout base dir this path returns 403.
+### Server installation
+
+```shell
+task server:start-docker
+```
+
+```shell
+task server:install
+```
+
+### Add custom modules
+
+Local development:
+```
+task dev:install-modules
+```
+
+Server: 
+```
+task server:install-modules
+```

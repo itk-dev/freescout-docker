@@ -5,7 +5,24 @@ services:
     image: itkdev/php8.2-fpm:alpine
     volumes:
       - ./freescout:/app
+    networks:
+      - frontend
 
   nginx:
     volumes:
       - ./freescout:/app
+
+  supervisor:
+    image: itkdev/supervisor-php8.2:alpine
+    restart: unless-stopped
+    stop_grace_period: 20s
+    environment:
+      - APP_SUPERVISOR_COMMAND=/app/artisan queue:work --queue='emails,default,7f431108279cccae74395663b38a0a91' --sleep=5 --tries=1 --timeout=1800
+      - APP_SUPERVISOR_WORKERS=2
+      - APP_SUPERVISOR_USER=deploy
+    networks:
+      - app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - .:/app:delegated
