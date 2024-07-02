@@ -13,9 +13,8 @@ tasks:
     summary: Install Freescout distribution
     cmds:
       - sh -c "wget https://github.com/freescout-help-desk/freescout/archive/refs/tags/{{.VERSION}}.tar.gz"
-      - sh -c "mkdir freescout"
-      - sh -c "tar -xzvf ./{{.VERSION}}.tar.gz"
-      - sh -c "mv freescout-{{.VERSION}}/* freescout"
+      - sh -c "tar -xzf ./{{.VERSION}}.tar.gz"
+      - sh -c "mv freescout-{{.VERSION}} freescout"
       - sh -c "rm -Rf freescout-{{.VERSION}} {{.VERSION}}.tar.gz"
 
   dev:start-docker:
