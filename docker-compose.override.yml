@@ -6,6 +6,8 @@ services:
     image: itkdev/php8.2-fpm:latest
     volumes:
       - ./freescout:/app
+    networks:
+      - frontend
 
   nginx:
     volumes:
