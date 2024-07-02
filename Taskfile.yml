@@ -25,6 +25,7 @@ tasks:
   dev:install:
     - sh -c "cp templates/.env.example freescout/.env"
     - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan key:generate"
+    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan migrate:fresh"
 
   dev:install-modules:
     - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
@@ -41,6 +42,7 @@ tasks:
     - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
     - sh -c "cp templates/.env.example freescout/.env"
     - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan key:generate"
+    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan migrate:fresh"
 
   server:install-modules:
     - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
