@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
     stop_grace_period: 20s
     environment:
-      - APP_SUPERVISOR_COMMAND=php /app/artisan queue:work --queue='emails,default,7f431108279cccae74395663b38a0a91' --sleep=5 --tries=1 --timeout=1800
+      - APP_SUPERVISOR_COMMAND=php /app/artisan queue:work --queue='${WORK_QUEUES}' --sleep=5 --tries=1 --timeout=1800
       - APP_SUPERVISOR_WORKERS=2
       - APP_SUPERVISOR_USER=deploy
     networks:

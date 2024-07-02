@@ -50,3 +50,16 @@ Server:
 ```
 task server:install-modules
 ```
+
+## Set up supervisor to work the queues
+Add WORK_QUEUES variable to .env.docker.local
+
+To get the correct value run
+```
+itkdev-docker-compose exec phpfpm php artisan schedule:run
+```
+The value after: `usr/bin/php8.2' 'artisan' queue:work --queue=...` is the WORK_QUEUES value we are looking for.
+Something similar to :
+```
+WORK_QUEUES="emails,default,..."
+```
