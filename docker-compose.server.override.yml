@@ -5,6 +5,8 @@ services:
     image: itkdev/php8.2-fpm:alpine
     volumes:
       - ./freescout:/app
+    networks:
+      - frontend
 
   nginx:
     volumes:
