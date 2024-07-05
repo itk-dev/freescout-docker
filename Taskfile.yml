@@ -31,7 +31,6 @@ tasks:
     - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan migrate:fresh"
 
   dev:install-modules:
-    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
     - task fetch-modules
     - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan freescout:clear-cache"
     - sh -c "{{ .DOCKERCMD }} composer dumpautoload"
@@ -47,7 +46,6 @@ tasks:
     - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan migrate:fresh"
 
   server:install-modules:
-    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
     - task fetch-modules
     - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan freescout:clear-cache"
     - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm composer dumpautoload"
