@@ -1,15 +1,17 @@
-# itk-version: 3.1.0
-version: "3"
-
 services:
   phpfpm:
     image: itkdev/php8.2-fpm:latest
+    environment:
+      - PHP_POST_MAX_SIZE=22M
+      - PHP_UPLOAD_MAX_FILESIZE=20M
     volumes:
       - ./freescout:/app
     networks:
       - frontend
 
   nginx:
+    environment:
+      NGINX_MAX_BODY_SIZE: 25M
     volumes:
       - ./freescout:/app
 

@@ -4,6 +4,8 @@ server {
 
     root ${NGINX_WEB_ROOT};
 
+    index index.php;
+
     location / {
         # try to serve file directly, fallback to index.php
         try_files $uri $uri/ /index.php$is_args$args;
@@ -51,9 +53,6 @@ server {
         expires 1M;
         access_log off;
         add_header Cache-Control "public";
-    }
-    location ~ /\. {
-        deny  all;
     }
 
     # Send log message to files symlinked to stdout/stderr.
