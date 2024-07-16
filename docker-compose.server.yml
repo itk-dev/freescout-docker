@@ -26,6 +26,7 @@ services:
     restart: unless-stopped
     networks:
       - app
+      - frontend
     depends_on:
       - phpfpm
     volumes:
