@@ -20,6 +20,8 @@ tasks:
   fetch-modules:
     - git clone https://github.com/itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
     - git clone https://github.com/itk-dev/freescout-itk-portal-submit.git {{ .PLUGIN_TARGET_DIR }}/ItkPortalSubmit
+    - git clone https://github.com/itk-dev/freescout-itk-conversation-changes.git {{ .PLUGIN_TARGET_DIR }}/ItkConversationChanges
+    - task install-prometheus.module
 
   dev:start-docker:
     cmds:
@@ -49,5 +51,10 @@ tasks:
     - task fetch-modules
     - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan freescout:clear-cache"
     - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm composer dumpautoload"
+
+  install-prometheus-module:
+    - git clone https://github.com/itk-dev/freescout-itk-prometheus.git {{ .PLUGIN_TARGET_DIR }}/ItkPrometheus
+    - sh -c "cp templates/.env.example freescout/.env"
+    - sh -c "{{ .DOCKERCMD }} composer install
 
 
