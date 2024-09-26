@@ -1,59 +1,53 @@
 version: '3'
 
-dotenv: [".task.env"]
+dotenv: [".task.env", ".env"]
 
 vars:
   TARGET_DIR: 'freescout'
   PLUGIN_TARGET_DIR: 'freescout/Modules'
-  DOCKERCMD: 'itkdev-docker-compose'
-  DOCKERCMD_SERVER: 'itkdev-docker-compose-server'
+  DOCKER_COMPOSE: '{{ .TASK_DOCKER_COMPOSE | default "itkdev-docker-compose-server" }}'
 
 tasks:
   dist:build:
     summary: Install Freescout distribution
     cmds:
-      - sh -c "wget https://github.com/freescout-help-desk/freescout/archive/refs/tags/{{.VERSION}}.tar.gz"
+      - sh -c "wget https://github.com/freescout-help-desk/freescout/archive/refs/tags/{{.FREESCOUT_VERSION}}.tar.gz"
       - sh -c "mkdir freescout"
-      - sh -c "tar -xzf ./{{.VERSION}}.tar.gz --strip-components 1 -C freescout"
-      - sh -c "rm {{.VERSION}}.tar.gz"
+      - sh -c "tar -xzf ./{{.FREESCOUT_VERSION}}.tar.gz --strip-components 1 -C freescout"
+      - sh -c "rm {{.FREESCOUT_VERSION}}.tar.gz"
+
+  start-docker:
+    cmds:
+      - sh -c "{{ .DOCKER_COMPOSE }} up --detach --force-recreate --remove-orphans"
+
+  install:
+    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
+    - sh -c "cp templates/.env.example freescout/.env"
+    - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan key:generate"
+    - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan migrate:fresh"
+    - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan storage:link"
+
+  install-modules:
+    - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:module-install itkprometheus"
+    - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:module-install itkissuecreate"
+    - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:module-install itkportalsubmit"
+    - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:module-install itkconversationchanges"
 
   fetch-modules:
     - git clone https://github.com/itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
     - git clone https://github.com/itk-dev/freescout-itk-portal-submit.git {{ .PLUGIN_TARGET_DIR }}/ItkPortalSubmit
     - git clone https://github.com/itk-dev/freescout-itk-conversation-changes.git {{ .PLUGIN_TARGET_DIR }}/ItkConversationChanges
-    - task install-prometheus-module
+    - task fetch-build-prometheus-module
+    - sh -c "{{ .DOCKER_COMPOSE }} composer dumpautoload"
+    - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:clear-cache"
 
-  dev:start-docker:
-    cmds:
-      - sh -c "{{ .DOCKERCMD }} up --detach --force-recreate --remove-orphans"
-
-  dev:install:
-    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
-    - sh -c "cp templates/.env.example freescout/.env"
-    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan key:generate"
-    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan migrate:fresh"
-    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan storage:link"
-
-  dev:install-modules:
-    - task fetch-modules
-    - sh -c "{{ .DOCKERCMD }} composer dumpautoload"
-    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan freescout:clear-cache"
-
-  server:start-docker:
-    cmds:
-      - sh -c "{{ .DOCKERCMD_SERVER }} up --detach --force-recreate --remove-orphans"
-
-  server:install:
-    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
-    - sh -c "cp templates/.env.example freescout/.env"
-    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan key:generate"
-    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan migrate:fresh"
-
-  server:install-modules:
-    - task fetch-modules
-    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm php artisan freescout:clear-cache"
-    - sh -c "{{ .DOCKERCMD_SERVER }} exec phpfpm composer dumpautoload"
-
-  install-prometheus-module:
+  fetch-build-prometheus-module:
     - git clone https://github.com/itk-dev/freescout-itk-prometheus.git {{ .PLUGIN_TARGET_DIR }}/ItkPrometheus
-    - sh -c "{{ .DOCKERCMD }} composer install --working-dir=/app/Modules/ItkPrometheus"
+    - sh -c "{{ .DOCKER_COMPOSE }} composer install --working-dir=/app/Modules/ItkPrometheus"
+
+  build-from-scratch:
+    - task dist:build
+    - task start-docker
+    - task install
+    - task fetch-modules
+    - task install-modules
