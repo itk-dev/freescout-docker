@@ -21,7 +21,7 @@ tasks:
     - git clone https://github.com/itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
     - git clone https://github.com/itk-dev/freescout-itk-portal-submit.git {{ .PLUGIN_TARGET_DIR }}/ItkPortalSubmit
     - git clone https://github.com/itk-dev/freescout-itk-conversation-changes.git {{ .PLUGIN_TARGET_DIR }}/ItkConversationChanges
-    - task install-prometheus.module
+    - task install-prometheus-module
 
   dev:start-docker:
     cmds:
@@ -54,7 +54,4 @@ tasks:
 
   install-prometheus-module:
     - git clone https://github.com/itk-dev/freescout-itk-prometheus.git {{ .PLUGIN_TARGET_DIR }}/ItkPrometheus
-    - sh -c "cp templates/.env.example freescout/.env"
-    - sh -c "{{ .DOCKERCMD }} composer install
-
-
+    - sh -c "{{ .DOCKERCMD }} composer install --working-dir=/app/Modules/ItkPrometheus"
