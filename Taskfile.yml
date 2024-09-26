@@ -28,14 +28,16 @@ tasks:
       - sh -c "{{ .DOCKERCMD }} up --detach --force-recreate --remove-orphans"
 
   dev:install:
+    - sh -c "mkdir freescout/vendor/natxet/cssmin/src"
     - sh -c "cp templates/.env.example freescout/.env"
     - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan key:generate"
     - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan migrate:fresh"
+    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan storage:link"
 
   dev:install-modules:
     - task fetch-modules
-    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan freescout:clear-cache"
     - sh -c "{{ .DOCKERCMD }} composer dumpautoload"
+    - sh -c "{{ .DOCKERCMD }} exec phpfpm php artisan freescout:clear-cache"
 
   server:start-docker:
     cmds:
