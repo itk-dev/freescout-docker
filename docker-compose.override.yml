@@ -14,7 +14,12 @@ services:
       NGINX_MAX_BODY_SIZE: 25M
     volumes:
       - ./freescout:/app
-
+    labels:
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-support.rule=Host(`${COMPOSE_SUPPORT_DOMAIN}`)"
+      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-redirect-support.redirectregex.regex=${COMPOSE_SUPPORT_REGEX}"
+      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-redirect-support.redirectregex.replacement=http://${COMPOSE_DOMAIN}${COMPOSE_SUPPORT_URL}"
+      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-redirect-support.redirectregex.permanent=true"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-support.middlewares=${COMPOSE_PROJECT_NAME}-redirect-support"
   redis:
     image: 'redis:6'
     networks:
