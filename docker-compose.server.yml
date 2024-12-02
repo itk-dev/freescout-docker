@@ -1,4 +1,4 @@
-# itk-version: 3.2.0
+# itk-version: 3.2.1
 networks:
   frontend:
     external: true
@@ -8,7 +8,7 @@ networks:
 
 services:
   phpfpm:
-    image: itkdev/php8.1-fpm:alpine
+    image: itkdev/php8.2-fpm:alpine
     restart: unless-stopped
     networks:
       - app
@@ -18,6 +18,8 @@ services:
       - PHP_MAX_EXECUTION_TIME=30
       - PHP_MEMORY_LIMIT=128M
       - COMPOSER_VERSION=2
+    depends_on:
+      - memcached
     volumes:
       - .:/app
 
@@ -35,8 +37,9 @@ services:
       - .:/app
     environment:
       NGINX_FPM_SERVICE: ${COMPOSE_PROJECT_NAME}-phpfpm-1:9000
-      NGINX_WEB_ROOT: /app/public
+      NGINX_WEB_ROOT: /app/web
       NGINX_PORT: 8080
+      NGINX_MAX_BODY_SIZE: 5M
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=frontend"
@@ -46,3 +49,11 @@ services:
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_SERVER_DOMAIN}`)"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure"
+
+  memcached:
+    image: 'memcached:latest'
+    restart: unless-stopped
+    networks:
+      - app
+    environment:
+      - MEMCACHED_CACHE_SIZE=64

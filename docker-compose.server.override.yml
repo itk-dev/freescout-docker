@@ -10,6 +10,7 @@ services:
   nginx:
     environment:
       NGINX_MAX_BODY_SIZE: 25M
+      NGINX_WEB_ROOT: /app/public
     volumes:
       - ./freescout:/app
     labels:
