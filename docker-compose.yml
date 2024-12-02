@@ -1,4 +1,4 @@
-# itk-version: 3.2.0
+# itk-version: 3.2.1
 networks:
   frontend:
     external: true
@@ -19,9 +19,12 @@ services:
       - MYSQL_PASSWORD=db
       - MYSQL_DATABASE=db
       #- ENCRYPT=1 # Uncomment to enable database encryption.
+    # https://symfony.com/doc/current/setup/symfony_server.html#docker-integration
+    labels:
+      com.symfony.server.service-prefix: 'DATABASE'
 
   phpfpm:
-    image: itkdev/php8.1-fpm:latest
+    image: itkdev/php8.2-fpm:latest
     networks:
       - app
     extra_hosts:
@@ -37,6 +40,7 @@ services:
       - PHP_IDE_CONFIG=serverName=localhost
     depends_on:
       - mariadb
+      - memcached
     volumes:
       - .:/app
 
@@ -54,8 +58,9 @@ services:
       - .:/app
     environment:
       NGINX_FPM_SERVICE: ${COMPOSE_PROJECT_NAME}-phpfpm-1:9000
-      NGINX_WEB_ROOT: /app/public
+      NGINX_WEB_ROOT: /app/web
       NGINX_PORT: 8080
+      NGINX_MAX_BODY_SIZE: 5M
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=frontend"
@@ -63,6 +68,15 @@ services:
 #      HTTPS config - uncomment to enable redirect from :80 to :443
 #      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}.middlewares=redirect-to-https"
 #      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+  memcached:
+    image: 'memcached:latest'
+    networks:
+      - app
+    ports:
+      - '11211'
+    environment:
+      - MEMCACHED_CACHE_SIZE=64
 
   mail:
     image: axllent/mailpit
