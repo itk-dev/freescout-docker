@@ -37,6 +37,7 @@ services:
 
   redis:
     image: 'redis:6'
+    restart: unless-stopped
     networks:
       - app
 
