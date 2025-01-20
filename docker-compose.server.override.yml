@@ -39,5 +39,7 @@ services:
     image: 'redis:6'
     networks:
       - app
-    ports:
-      - '6379'
+
+  memcached:
+    deploy:
+      replicas: 0
