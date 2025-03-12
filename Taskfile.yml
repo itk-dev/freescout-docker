@@ -23,12 +23,18 @@ tasks:
       - sh -c "mkdir freescout-{{.FREESCOUT_VERSION}}"
       - sh -c "tar -xzf ./{{.FREESCOUT_VERSION}}.tar.gz --strip-components 1 -C freescout-{{.FREESCOUT_VERSION}}"
       - sh -c "rm {{.FREESCOUT_VERSION}}.tar.gz"
-      - sh -c "cp -R freescout/Modules freescout-{{.FREESCOUT_VERSION}}/Modules"
+      - sh -c "cp -R freescout/Modules/* freescout-{{.FREESCOUT_VERSION}}/Modules/"
       - sh -c "cp freescout/.env freescout-{{.FREESCOUT_VERSION}}/.env"
+      - sh -c "rm -rf freescout-{{.FREESCOUT_VERSION}}/storage"
+      - sh -c "cp -R freescout/storage freescout-{{.FREESCOUT_VERSION}}/storage"
       - sh -c "rm -rf freescout-old"
       - sh -c "mv freescout freescout-old"
       - sh -c "mv freescout-{{.FREESCOUT_VERSION}} freescout"
+      - sh -c "{{ .DOCKER_COMPOSE }} restart"
       - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan storage:link"
+      - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:after-app-update"
+      - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan config:clear"
+      - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan config:cache"
 
   start-docker:
     cmds:
@@ -52,7 +58,7 @@ tasks:
     - git clone https://github.com/itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
     - git clone https://github.com/itk-dev/freescout-itk-portal-submit.git {{ .PLUGIN_TARGET_DIR }}/ItkPortalSubmit
     - git clone https://github.com/itk-dev/freescout-itk-conversation-changes.git {{ .PLUGIN_TARGET_DIR }}/ItkConversationChanges
-    - git clone https://github.com/itk-dev/freescout-itk-laentime-sync.git {{ .PLUGIN_TARGET_DIR }}/ItkLeantimeSync
+    - git clone https://github.com/itk-dev/freescout-itk-leantime-sync.git {{ .PLUGIN_TARGET_DIR }}/ItkLeantimeSync
     - task fetch-build-prometheus-module
     - sh -c "{{ .DOCKER_COMPOSE }} composer dumpautoload"
     - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:clear-cache"
