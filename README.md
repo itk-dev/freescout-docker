@@ -67,3 +67,22 @@ Something similar to :
 ```
 WORK_QUEUES="emails,default,..."
 ```
+
+## Updating
+
+### Updating core
+Set new core version release in .env then run
+
+```shell
+task dist:update
+```
+
+### Updating contrib modules
+@todo Come up with something smarter.
+
+Contributed modules can be updated through the UI in the extensions list.
+
+### Updating custom modules
+@todo Come up with something smarter.
+
+Use git to pull the updated code.
