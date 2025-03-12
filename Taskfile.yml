@@ -16,6 +16,20 @@ tasks:
       - sh -c "tar -xzf ./{{.FREESCOUT_VERSION}}.tar.gz --strip-components 1 -C freescout"
       - sh -c "rm {{.FREESCOUT_VERSION}}.tar.gz"
 
+  dist:update:
+    summary: Update freescout distribution - Set desired version in .env
+    cmds:
+      - sh -c "wget https://github.com/freescout-help-desk/freescout/archive/refs/tags/{{.FREESCOUT_VERSION}}.tar.gz"
+      - sh -c "mkdir freescout-{{.FREESCOUT_VERSION}}"
+      - sh -c "tar -xzf ./{{.FREESCOUT_VERSION}}.tar.gz --strip-components 1 -C freescout-{{.FREESCOUT_VERSION}}"
+      - sh -c "rm {{.FREESCOUT_VERSION}}.tar.gz"
+      - sh -c "cp -R freescout/Modules freescout-{{.FREESCOUT_VERSION}}/Modules"
+      - sh -c "cp freescout/.env freescout-{{.FREESCOUT_VERSION}}/.env"
+      - sh -c "rm -rf freescout-old"
+      - sh -c "mv freescout freescout-old"
+      - sh -c "mv freescout-{{.FREESCOUT_VERSION}} freescout"
+      - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan storage:link"
+
   start-docker:
     cmds:
       - sh -c "{{ .DOCKER_COMPOSE }} up --detach --force-recreate --remove-orphans"
@@ -29,6 +43,7 @@ tasks:
 
   install-modules:
     - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:module-install itkprometheus"
+    - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:module-install itkleantimesync"
     - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:module-install itkissuecreate"
     - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:module-install itkportalsubmit"
     - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:module-install itkconversationchanges"
@@ -37,6 +52,7 @@ tasks:
     - git clone https://github.com/itk-dev/freescout-itk-issue-create.git {{ .PLUGIN_TARGET_DIR }}/ItkIssueCreate
     - git clone https://github.com/itk-dev/freescout-itk-portal-submit.git {{ .PLUGIN_TARGET_DIR }}/ItkPortalSubmit
     - git clone https://github.com/itk-dev/freescout-itk-conversation-changes.git {{ .PLUGIN_TARGET_DIR }}/ItkConversationChanges
+    - git clone https://github.com/itk-dev/freescout-itk-laentime-sync.git {{ .PLUGIN_TARGET_DIR }}/ItkLeantimeSync
     - task fetch-build-prometheus-module
     - sh -c "{{ .DOCKER_COMPOSE }} composer dumpautoload"
     - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:clear-cache"
