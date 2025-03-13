@@ -19,22 +19,30 @@ tasks:
   dist:update:
     summary: Update freescout distribution - Set desired version in .env
     cmds:
+      - echo 'Creating new distribution'
       - sh -c "wget https://github.com/freescout-help-desk/freescout/archive/refs/tags/{{.FREESCOUT_VERSION}}.tar.gz"
       - sh -c "mkdir freescout-{{.FREESCOUT_VERSION}}"
       - sh -c "tar -xzf ./{{.FREESCOUT_VERSION}}.tar.gz --strip-components 1 -C freescout-{{.FREESCOUT_VERSION}}"
       - sh -c "rm {{.FREESCOUT_VERSION}}.tar.gz"
+      - echo 'Copying files to new distribution'
       - sh -c "cp -R freescout/Modules/* freescout-{{.FREESCOUT_VERSION}}/Modules/"
       - sh -c "cp freescout/.env freescout-{{.FREESCOUT_VERSION}}/.env"
       - sh -c "rm -rf freescout-{{.FREESCOUT_VERSION}}/storage"
       - sh -c "cp -R freescout/storage freescout-{{.FREESCOUT_VERSION}}/storage"
+      - echo 'Moving outdated Freescout to freescout-old'
       - sh -c "rm -rf freescout-old"
       - sh -c "mv freescout freescout-old"
+      - echo 'Moving updated Freescout distribution into freescout folder'
       - sh -c "mv freescout-{{.FREESCOUT_VERSION}} freescout"
+      - echo 'Update freescout and clear caches'
       - sh -c "{{ .DOCKER_COMPOSE }} restart"
       - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan storage:link"
       - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:after-app-update"
+      - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:generate-vars"
       - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan config:clear"
       - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan config:cache"
+      - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan cache:clear"
+      - sh -c "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan freescout:module-install" --yes
 
   start-docker:
     cmds:
