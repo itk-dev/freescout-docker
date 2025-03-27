@@ -2,3 +2,4 @@
 .env.docker.local
 .task.env
 freescout
+freescout-old
