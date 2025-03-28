@@ -4,6 +4,7 @@ services:
     environment:
       - PHP_POST_MAX_SIZE=22M
       - PHP_UPLOAD_MAX_FILESIZE=20M
+      - PHP_SENDMAIL_PATH=/usr/bin/msmtp --host=mail --port=1025 --read-recipients
     volumes:
       - ./freescout:/app
     networks:
@@ -12,7 +13,7 @@ services:
   nginx:
     environment:
       NGINX_MAX_BODY_SIZE: 25M
-      NGINX_WEB_ROOT: /app/public 
+      NGINX_WEB_ROOT: /app/public
     volumes:
       - ./freescout:/app
     labels:
