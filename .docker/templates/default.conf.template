@@ -13,6 +13,19 @@ server {
     real_ip_recursive on;
     real_ip_header X-Forwarded-For;
 
+    ######
+    ## HACK to fix CSP with using 2 domains
+    ######
+    # Enable substitution
+    sub_filter_once off;
+    sub_filter_types text/html;
+
+    # Replace the CSP meta tag with our more permissive one
+    sub_filter '<meta http-equiv="Content-Security-Policy" content="script-src' '<meta http-equiv="Content-Security-Policy" content="default-src * \'self\' \'unsafe-inline\' \'unsafe-eval\' data:; script-src * \'self\' \'unsafe-inline\' \'unsafe-eval\' http>
+    ######
+    ## HACK to fix CSP with using 2 domains
+    ######
+
     location / {
         # try to serve file directly, fallback to index.php
         try_files $uri $uri/ /index.php$is_args$args;
