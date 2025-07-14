@@ -11,6 +11,8 @@ services:
     environment:
       NGINX_MAX_BODY_SIZE: 25M
       NGINX_WEB_ROOT: /app/public
+      COMPOSE_SERVER_DOMAIN: ${COMPOSE_SERVER_DOMAIN}
+      COMPOSE_SUPPORT_DOMAIN: ${COMPOSE_SUPPORT_DOMAIN}
     volumes:
       - ./freescout:/app
     labels:
