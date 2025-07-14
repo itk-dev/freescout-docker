@@ -23,7 +23,7 @@ services:
 
       # Added CSP headers
       - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-strip-csp.headers.customResponseHeaders.Content-Security-Policy="
-      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-add-csp.headers.customResponseHeaders.Content-Security-Policy=default-src * 'unsafe-inline' 'unsafe-hashes' 'unsafe-eval' data:;"
+      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-add-csp.headers.customResponseHeaders.Content-Security-Policy=default-src * 'unsafe-inline' 'unsafe-eval' data:; style-src * 'self' 'unsafe-inline' 'unsafe-hashes' https://${COMPOSE_SUPPORT_DOMAIN} https://${COMPOSE_SERVER_DOMAIN}; script-src * 'self' 'unsafe-inline' 'unsafe-eval' https://${COMPOSE_SUPPORT_DOMAIN} https://${COMPOSE_SERVER_DOMAIN} data:;"
 
       # Adding extra labels to add support domain.
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-support.rule=Host(`${COMPOSE_SUPPORT_DOMAIN}`)"
