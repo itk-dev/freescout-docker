@@ -16,21 +16,12 @@ services:
     volumes:
       - ./freescout:/app
     labels:
-      # Add cors header to allow JS.
-      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-cors.headers.accesscontrolalloworiginlist=https://${COMPOSE_SUPPORT_DOMAIN}"
-      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
-      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
-
-      # Added CSP headers
-      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-strip-csp.headers.customResponseHeaders.Content-Security-Policy="
-      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-add-csp.headers.customResponseHeaders.Content-Security-Policy=default-src * 'unsafe-inline' 'unsafe-eval' data:; style-src * 'self' 'unsafe-inline' https://${COMPOSE_SUPPORT_DOMAIN} https://${COMPOSE_SERVER_DOMAIN}; style-src-attr * 'unsafe-inline'; script-src * 'self' 'unsafe-inline' 'unsafe-eval' https://${COMPOSE_SUPPORT_DOMAIN} https://${COMPOSE_SERVER_DOMAIN} data:;"
-
       # Adding extra labels to add support domain.
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-support.rule=Host(`${COMPOSE_SUPPORT_DOMAIN}`)"
       - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-redirect-support.redirectregex.regex=${COMPOSE_SUPPORT_REGEX}"
       - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-redirect-support.redirectregex.replacement=https://${COMPOSE_SERVER_DOMAIN}${COMPOSE_SUPPORT_URL}"
       - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-redirect-support.redirectregex.permanent=true"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-support.middlewares=${COMPOSE_PROJECT_NAME}-redirect-support,${COMPOSE_PROJECT_NAME}-strip-csp,${COMPOSE_PROJECT_NAME}-add-csp,${COMPOSE_PROJECT_NAME}-cors"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-support.middlewares=${COMPOSE_PROJECT_NAME}-redirect-support"
 
   supervisor:
     image: itkdev/supervisor-php8.2:alpine
