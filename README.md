@@ -67,3 +67,32 @@ Something similar to :
 ```
 WORK_QUEUES="emails,default,..."
 ```
+
+## Template overrides
+
+> Is it possible to do template overrides (in Freescout, Ed.)?
+> Nope.
+> [<https://github.com/freescout-help-desk/freescout/issues/1045>]
+
+Overriding views (templates) in Freescout is not easy, but it can be done. Modules typically use templates from two
+locations (in order of priority):
+
+1. `resources/views/modules/«module alias»`
+2. `Modules/EndUserPortal/«module name»/views/`
+
+As an example, the `EndUserPortal` module will first look for a template in `resources/views/modules/enduserportal` and
+then, if no template found, in `Modules/EndUserPortal/EndUserPortal/views/`.
+
+This means that we can surgically insert customized templates using [Docker compose
+volumes](https://docs.docker.com/reference/compose-file/volumes/):
+
+``` yaml
+services:
+  phpfpm:
+    volumes:
+      - ./freescout-resources/views/modules/enduserportal/emails/login.blade.php:/app/resources/views/modules/enduserportal/emails/login.blade.php
+      - ./freescout-resources/views/modules/enduserportal/login.blade.php:/app/resources/views/modules/enduserportal/login.blade.php
+      - ./freescout-resources/views/modules/enduserportal/partials/submit_form.blade.php:/app/resources/views/modules/enduserportal/partials/submit_form.blade.php
+```
+
+Freescout will now use our custom templates on `/help/…/auth` and in the email sent to the customer.

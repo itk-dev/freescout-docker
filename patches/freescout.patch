@@ -1,0 +1,26 @@
+diff --git a/freescout/app/Misc/WpApi.php b/freescout/app/Misc/WpApi.php
+index be289c2..d6e084c 100644
+--- a/freescout/app/Misc/WpApi.php
++++ b/freescout/app/Misc/WpApi.php
+@@ -118,7 +118,7 @@ class WpApi
+      * Check module license.
+      */
+     public static function checkLicenses($params)
+-    {
++    {return;
+         $params['action'] = self::ACTION_CHECK_LICENSES;
+
+         $endpoint = self::ENDPOINT_MODULES;
+diff --git a/freescout/app/Module.php b/freescout/app/Module.php
+index e06ec8f..9707fd9 100644
+--- a/freescout/app/Module.php
++++ b/freescout/app/Module.php
+@@ -153,7 +153,7 @@ class Module extends Model
+      * Deactivate module and update modules cache.
+      */
+     public static function deactiveModule($alias, $clear_app_cache = true)
+-    {
++    {return;
+         self::setActive($alias, false);
+         // Update modules cache
+         \Module::clearCache();
