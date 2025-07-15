@@ -75,12 +75,12 @@ tasks:
   development:freescout-patch:
     prompt: "Really patch Freescout?"
     cmds:
-      # - patch --strip=1 --dry-run < patches/freescout.patch && patch --strip=1 < patches/freescout.patch
-      - patch --strip=1 --quiet < patches/freescout.patch
+      # - patch --strip=1 --dry-run < patches/freescout-module-hacks.patch && patch --strip=1 < patches/freescout-module-hacks.patch
+      - patch --strip=1 --quiet < patches/freescout-module-hacks.patch
       - task artisan -- cache:clear
 
       # git add -f freescout/app/Misc/WpApi.php freescout/app/Module.php
-      # git diff freescout > patches/freescout.patch
+      # git diff freescout > patches/freescout-module-hacks.patch
 
   # https://github.com/freescout-help-desk/freescout/wiki/Translate
   development:show-danish-translations:
@@ -88,7 +88,8 @@ tasks:
       - "{{ .DOCKER_COMPOSE }} exec --no-TTY mariadb mysql --user=db --password=db db --table <<< \"SELECT * FROM ltm_translations WHERE locale = 'da' AND value IS NOT NULL;\""
 
   development:pull:
-    prompt: This will override your files. Continue?
+    desc: "Pull code and configuration from remote installation"
+    prompt: "This will override your local files. Continue?"
     cmds:
       - rsync -azv ${REMOTE_HOST}:${REMOTE_FREESCOUT_PATH} --exclude cache --exclude sessions --exclude logs --exclude builds .
       # Make sure that folders not rsync'ed exist
