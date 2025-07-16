@@ -148,7 +148,6 @@
                                             @endif
                                         />
                                     @endif
-                                    <!-- TODO: Is this the right place for the help text? -->
                                     @if (0 === strcasecmp($custom_field->name, 'URL'))
                                         <span style="color: #808080;">F.eks. https://eksempel.dk/eksempelside</span>
                                     @endif
