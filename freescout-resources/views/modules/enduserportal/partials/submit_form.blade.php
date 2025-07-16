@@ -88,8 +88,9 @@
                                 @if ($custom_field->type == CustomField::TYPE_DATE) @php $add_calendar = true @endphp @endif
                                 <div class="form-group">
                                     @if (0 === strcasecmp($custom_field->name, 'URL'))
-                                        <p><strong>En url er guld værd …</strong></p>
+                                        <p><strong>Indsæt webadressen hvor du oplever at have brug for support</strong></p>
                                     @endif
+
 
                                     @if ($custom_field->type == CustomField::TYPE_DROPDOWN)
                                         @foreach($custom_field->options as $option_key => $option_name)
@@ -147,6 +148,10 @@
                                             @endif
                                         />
                                     @endif
+                                    <!-- TODO: Is this the right place for the help text? -->
+                                    @if (0 === strcasecmp($custom_field->name, 'URL'))
+                                        <span style="color: #808080;">F.eks. https://eksempel.dk/eksempelside</span>
+                                    @endif
                                 </div>
                             @endif
                         @endforeach
@@ -166,17 +171,23 @@
 
             <p><strong>Tid er penge … fortæl os præcist …</strong></p>
             <ol>
-                <li>hvad du gør</li>
-                <li>hvad der sker</li>
-                <li>hvad du forventer</li>
+                <li>Hvad du gjorde forud for at du fik brug for support?</li>
+                <li>Hvad du oplever der sker?</li>
+                <li>Hvad du forventede der skulle ske?</li>
             </ol>
+            <p>En god fejlbeskrivelse gør det nemmere og hurtigere at finde en fejl.</p>
 
             {{-- Set default message if not already set --}}
             @php
             $text = <<<'EOF'
-            1. Når jeg er på … og trykker på …
-            2. …
-            3. …
+            1. Hvad gjorde du?
+            Skriv dit svar her ...
+
+            2. Hvad oplever du?
+            Skriv dit svar her ...
+
+            3. Hvad forventede du?
+            Skriv dit svar her ...
             EOF;
 
             $placeholder = __('Message').'*';
