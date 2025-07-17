@@ -140,7 +140,16 @@
                                         @endif
                                         </select>
                                     @else
-                                        <input name="cf[{{ $custom_field->id }}]" class="form-control eup-remember @if ($custom_field->type == CustomField::TYPE_DATE) eup-type-date @endif" value="{{ $custom_field_value }}" @if ($custom_field_value) data-prefilled="1" @endif placeholder="{{ $custom_field->name }}@if ($custom_field->required)*@endif" @if ($custom_field->required) required @endif
+                                        @php
+                                        $placeholder = $custom_field->name;
+                                        if (0 === strcasecmp($custom_field->name, 'URL')) {
+                                          $placeholder = 'Webadresse';
+                                        }
+                                        if ($custom_field->required) {
+                                          $placeholder .= '*';
+                                        }
+                                        @endphp
+                                        <input name="cf[{{ $custom_field->id }}]" class="form-control eup-remember @if ($custom_field->type == CustomField::TYPE_DATE) eup-type-date @endif" value="{{ $custom_field_value }}" @if ($custom_field_value) data-prefilled="1" @endif placeholder="{{ $placeholder }}" @if ($custom_field->required) required @endif
                                             @if ($custom_field->type == CustomField::TYPE_NUMBER)
                                                 type="number"
                                             @else
