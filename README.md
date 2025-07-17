@@ -29,7 +29,7 @@ task build-from-scratch
 ```
 
 ### 2) Second option
-    
+
 #### Build the Freescout distribution version defined in .env.
 
 ```shell
@@ -67,3 +67,65 @@ Something similar to :
 ```
 WORK_QUEUES="emails,default,..."
 ```
+
+## Template overrides
+
+> Is it possible to do template overrides (in Freescout, Ed.)?
+> Nope.
+> [<https://github.com/freescout-help-desk/freescout/issues/1045>]
+
+Overriding views (templates) in Freescout is not easy, but it can be done. Modules typically use templates from two
+locations (in order of priority):
+
+1. `resources/views/modules/«module alias»`
+2. `Modules/EndUserPortal/«module name»/views/`
+
+As an example, the `EndUserPortal` module will first look for a template in `resources/views/modules/enduserportal` and
+then, if no template found, in `Modules/EndUserPortal/EndUserPortal/views/`.
+
+This means that we can surgically insert customized templates using [Docker compose
+volumes](https://docs.docker.com/reference/compose-file/volumes/):
+
+``` yaml
+services:
+  phpfpm:
+    volumes:
+      - ./freescout-resources/views/modules/enduserportal/emails/login.blade.php:/app/resources/views/modules/enduserportal/emails/login.blade.php
+      - ./freescout-resources/views/modules/enduserportal/login.blade.php:/app/resources/views/modules/enduserportal/login.blade.php
+      - ./freescout-resources/views/modules/enduserportal/partials/submit_form.blade.php:/app/resources/views/modules/enduserportal/partials/submit_form.blade.php
+```
+
+Freescout will now use our custom templates on `/help/…` and in the email sent to the customer.
+
+> [!WARNING]
+> During template development you may have to run `task artisan -- freescout:clear-cache` to remove compiled (and
+> cached) template files. If you experience “500 Internal Server Error“[^1] after changing a template and clearing the
+> template cache does not resolve the issue, you can edit
+> `freescout/overrides/laravel/framework/src/Illuminate/View/Compilers/Compiler.php` and pretend that a template cache is
+> always expired:
+>
+> ``` diff
+>      public function isExpired($path)
+> -    {
+> +    {return true;
+>          $compiled = $this->getCompiledPath($path);
+> ```
+
+[^1]: This seems related to Laravel (on which Freescout is built) generating incomplete files during template compilation.
+
+Run
+
+``` shell
+diff -w freescout-resources/views/modules/enduserportal/login.blade.php freescout/Modules/EndUserPortal/Resources/views/login.blade.php
+diff -w freescout-resources/views/modules/enduserportal/emails/login.blade.php freescout/Modules/EndUserPortal/Resources/views/emails/login.blade.php
+diff -w freescout-resources/views/modules/enduserportal/partials/submit_form.blade.php freescout/Modules/EndUserPortal/Resources/views/partials/submit_form.blade.php
+```
+
+to compare our custom template files with the originals.
+
+> [!TIP]
+> Use [Meld](https://meldmerge.org) (<https://meldmerge.org>) for a better overview of the actual changes, e.g. by running
+>
+> ``` shell
+> meld freescout-resources/views/modules/enduserportal/partials/submit_form.blade.php freescout/Modules/EndUserPortal/Resources/views/partials/submit_form.blade.php
+> ```
