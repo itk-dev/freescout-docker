@@ -167,46 +167,49 @@
                 @endif
             @endif
 
-            <p><strong>Kort beskrivelse af sagen</strong></p>
+            @php
+            $placeholder = __('Message').'*';
+            @endphp
 
             @if ((int)\EndUserPortal::getMailboxParam($mailbox, 'subject') && empty($conversation->id))
+                <p><strong>Kort beskrivelse af sagen</strong></p>
+
                 <div class="form-group{{ $errors->has('subject') ? ' has-error' : '' }}">
                     <input name="subject" class="form-control" value="{{ old('subject', $values['subject'] ?? '') }}" placeholder="{{ __('Subject') }}*" @if (!empty($values['subject'])) data-prefilled="1" @endif required type="text" />
 
                     @include('partials/field_error', ['field'=>'subject'])
                 </div>
+
+                <p><strong>Tid er penge … fortæl os præcist …</strong></p>
+                <ol>
+                    <li>Hvad du gjorde forud for at du fik brug for support?</li>
+                    <li>Hvad du oplever der sker?</li>
+                    <li>Hvad du forventede der skulle ske?</li>
+                </ol>
+                <p>En god fejlbeskrivelse gør det nemmere og hurtigere at finde en fejl.</p>
+
+                {{-- Set default message if not already set --}}
+                @php
+                $text = <<<'EOF'
+                1. Hvad gjorde du?
+                Skriv dit svar her ...
+
+                2. Hvad oplever du?
+                Skriv dit svar her ...
+
+                3. Hvad forventede du?
+                Skriv dit svar her ...
+                EOF;
+
+                // @todo Should we set the placeholder?
+                // See https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/textarea#placeholder for details on line breaks in textarea placeholders.
+                $placeholder = $text;
+                // @todo Should we help the user by prefilling the message?
+                if (empty($values['message'])) {
+                  $values['message'] = $text;
+                }
+                @endphp
             @endif
-
-            <p><strong>Tid er penge … fortæl os præcist …</strong></p>
-            <ol>
-                <li>Hvad du gjorde forud for at du fik brug for support?</li>
-                <li>Hvad du oplever der sker?</li>
-                <li>Hvad du forventede der skulle ske?</li>
-            </ol>
-            <p>En god fejlbeskrivelse gør det nemmere og hurtigere at finde en fejl.</p>
-
-            {{-- Set default message if not already set --}}
-            @php
-            $text = <<<'EOF'
-            1. Hvad gjorde du?
-            Skriv dit svar her ...
-
-            2. Hvad oplever du?
-            Skriv dit svar her ...
-
-            3. Hvad forventede du?
-            Skriv dit svar her ...
-            EOF;
-
-            $placeholder = __('Message').'*';
-            // @todo Should we set the placeholder?
-            // See https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/textarea#placeholder for details on line breaks in textarea placeholders.
-            $placeholder = $text;
-            // @todo Should we help the user by prefilling the message?
-            if (empty($values['message'])) {
-              $values['message'] = $text;
-            }
-            @endphp
 
             <div class="form-group{{ $errors->has('message') ? ' has-error' : '' }}">
 
