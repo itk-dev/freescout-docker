@@ -6,7 +6,10 @@ services:
       - PHP_UPLOAD_MAX_FILESIZE=20M
     volumes:
       - ./freescout:/app
-
+      # See README.md for details on what's going on here
+      - ./freescout-resources/views/modules/enduserportal/emails/login.blade.php:/app/resources/views/modules/enduserportal/emails/login.blade.php
+      - ./freescout-resources/views/modules/enduserportal/login.blade.php:/app/resources/views/modules/enduserportal/login.blade.php
+      - ./freescout-resources/views/modules/enduserportal/partials/submit_form.blade.php:/app/resources/views/modules/enduserportal/partials/submit_form.blade.php
   nginx:
     environment:
       NGINX_MAX_BODY_SIZE: 25M

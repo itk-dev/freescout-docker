@@ -1,6 +1,6 @@
 version: '3'
 
-dotenv: [".task.env", ".env"]
+dotenv: [".task.env", ".env", ".env.local"]
 
 vars:
   TARGET_DIR: 'freescout'
@@ -51,3 +51,71 @@ tasks:
     - task install
     - task fetch-modules
     - task install-modules
+
+  artisan:
+    desc: "Run artisan command, e.g. `task {{.TASK}} -- cache:clear`"
+    cmds:
+      - "{{ .DOCKER_COMPOSE }} exec phpfpm php artisan {{.CLI_ARGS}}"
+
+  development:options-reset:
+    prompt: "Really reset options?"
+    cmds:
+      - "{{ .DOCKER_COMPOSE }} exec --no-TTY mariadb mysql --user=db --password=db db <<< \"UPDATE options SET value = 'mail' WHERE name='mail_host'\""
+      - "{{ .DOCKER_COMPOSE }} exec --no-TTY mariadb mysql --user=db --password=db db <<< \"UPDATE options SET value = '1025' WHERE name='mail_port'\""
+      - "{{ .DOCKER_COMPOSE }} exec --no-TTY mariadb mysql --user=db --password=db db <<< \"UPDATE options SET value = 'mail@freescout.local.itkdev.dk' WHERE name='mail_from'\""
+      - "{{ .DOCKER_COMPOSE }} exec --no-TTY mariadb mysql --user=db --password=db db <<< \"UPDATE options SET value = 'mail@freescout.local.itkdev.dk' WHERE name='send_test_to'\""
+      # Promote all users
+      - "{{ .DOCKER_COMPOSE }} exec --no-TTY mariadb mysql --user=db --password=db db <<< \"UPDATE users SET role = 2\""
+
+      - task artisan -- cache:clear
+      - task artisan -- freescout:logout-users
+      - rm -f freescout/storage/framework/sessions/* freescout/bootstrap/cache/*.*
+      - task artisan -- freescout:clear-cache
+
+  development:freescout-patch:
+    prompt: "Really patch Freescout?"
+    cmds:
+      # - patch --strip=1 --dry-run < patches/freescout-module-hacks.patch && patch --strip=1 < patches/freescout-module-hacks.patch
+      - patch --strip=1 --quiet < patches/freescout-module-hacks.patch
+      - task artisan -- cache:clear
+
+      # git add -f freescout/app/Misc/WpApi.php freescout/app/Module.php
+      # git diff freescout > patches/freescout-module-hacks.patch
+
+  # https://github.com/freescout-help-desk/freescout/wiki/Translate
+  development:show-danish-translations:
+    cmds:
+      - "{{ .DOCKER_COMPOSE }} exec --no-TTY mariadb mysql --user=db --password=db db --table <<< \"SELECT * FROM ltm_translations WHERE locale = 'da' AND value IS NOT NULL;\""
+
+  development:pull:
+    desc: "Pull code and configuration from remote installation"
+    prompt: "This will override your local files. Continue?"
+    cmds:
+      - rsync -azv ${REMOTE_HOST}:${REMOTE_FREESCOUT_PATH} --exclude cache --exclude sessions --exclude logs --exclude builds .
+      # Make sure that folders not rsync'ed exist
+      - mkdir -p freescout/bootstrap/cache freescout/storage/logs freescout/storage/framework/{cache,sessions} freescout/public/js/builds
+      - rm -fr freescout/bootstrap/cache/* freescout/storage/logs/* freescout/storage/framework/{cache,sessions}/* freescout/public/js/builds/*
+      # Apparently, first one wins, so we set some variables first in the env file.
+      - |
+          (
+          echo "# Local development"
+          echo APP_URL=https://freescout.local.itkdev.dk
+          echo APP_DEBUG=true
+          echo DB_HOST=mariadb
+          echo DB_DATABASE=db
+          echo DB_USERNAME=db
+          echo DB_PASSWORD=db
+
+          cat freescout/.env
+          ) > freescout/.env.tmp
+          mv freescout/.env.tmp freescout/.env
+      - task artisan -- cache:clear
+      - task artisan -- freescout:build
+      - task: development:freescout-patch
+      - task: development:options-reset
+      - docker compose up --detach --force-recreate
+    # https://taskfile.dev/reference/schema/#requires
+    requires:
+      vars:
+        - REMOTE_HOST
+        - REMOTE_FREESCOUT_PATH

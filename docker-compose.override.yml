@@ -4,15 +4,20 @@ services:
     environment:
       - PHP_POST_MAX_SIZE=22M
       - PHP_UPLOAD_MAX_FILESIZE=20M
+      - PHP_SENDMAIL_PATH=/usr/bin/msmtp --host=mail --port=1025 --read-recipients
     volumes:
       - ./freescout:/app
+      # See README.md for details on what's going on here
+      - ./freescout-resources/views/modules/enduserportal/emails/login.blade.php:/app/resources/views/modules/enduserportal/emails/login.blade.php
+      - ./freescout-resources/views/modules/enduserportal/login.blade.php:/app/resources/views/modules/enduserportal/login.blade.php
+      - ./freescout-resources/views/modules/enduserportal/partials/submit_form.blade.php:/app/resources/views/modules/enduserportal/partials/submit_form.blade.php
     networks:
       - frontend
 
   nginx:
     environment:
       NGINX_MAX_BODY_SIZE: 25M
-      NGINX_WEB_ROOT: /app/public 
+      NGINX_WEB_ROOT: /app/public
     volumes:
       - ./freescout:/app
     labels:
@@ -27,3 +32,8 @@ services:
       - app
     ports:
       - '6379'
+
+  mail:
+    environment:
+        # https://mailpit.axllent.org/docs/configuration/runtime-options/
+        - "MP_VERBOSE=true"
